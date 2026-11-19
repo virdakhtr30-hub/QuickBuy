@@ -1,0 +1,106 @@
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: quickbuy-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: inventory_db
+    ports:
+      # - "5433:5432"
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: quickbuy-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      # - "5672:5672"
+      # - "15672:15672"
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  
+  gateway:
+    image: nginx:alpine
+    container_name: quickbuy-gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend:/usr/share/nginx/html:ro
+  
+
+  
+  inventory-service:
+    build: ./services/inventory-service
+    container_name: quickbuy-inventory
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    ports:
+      # - "5001:5001"
+      - "127.0.0.1:5001:5001"
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  
+  order-service:
+    build: ./services/order-service
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # container_name: quickbuy-order
+    # ports:
+    #   - "5002:5002"
+    expose:
+      - "5002"
+    depends_on:
+      - postgres
+      - inventory-service
+
+  
+  notification-service:
+    build: ./services/notification-service
+    container_name: quickbuy-notification
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      # - "5003:5003"
+      - "127.0.0.1:5003:5003"
+    depends_on:
+      - postgres
+
+  notification-consumer:
+    build: ./services/notification-service
+    container_name: quickbuy-notification-consumer
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+    command: ["python", "-u", "consumer.py"]
+    depends_on:
+      - postgres
+      - rabbitmq
+    restart: unless-stopped
+
+
+
+
+
+volumes:
+  postgres_data:
+  rabbitmq_data:

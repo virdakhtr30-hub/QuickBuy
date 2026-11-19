@@ -1,0 +1,23 @@
+# Sensitive configuration
+.env
+.env.*
+
+# Python virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Testing cache
+.pytest_cache/
+
+# Build artifacts
+*.tar
+*.zip
+
+# Private keys and local AWS credentials
+*.pem
+*.key
+.aws/

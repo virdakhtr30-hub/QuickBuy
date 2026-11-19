@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickBuy</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>QuickBuy</h1>
+        <p>Shop smarter, checkout faster</p>
+    </header>
+
+    <nav class="main-nav">
+        <button type="button" onclick="showPage('shop')">Shop</button>
+        <button type="button" onclick="showPage('cart')">Cart</button>
+        <button type="button" onclick="showPage('admin')">Admin</button>
+    </nav>
+
+    <main>
+        <div id="shopPage" class="page">
+            <section>
+                <h2>Shop Products</h2>
+                <div id="products">
+                    Products will appear here.
+                </div>
+            </section>
+        </div>
+
+        <div id="cartPage" class="page">
+            <section>
+                <h2>Your Cart</h2>
+                <div id="cart">
+                    Your cart is empty.
+                </div>
+            </section>
+
+            <section>
+                <h2>Checkout</h2>
+
+                <label for="customerName">Customer Name</label>
+                <input
+                    type="text"
+                    id="customerName"
+                    placeholder="Enter your name"
+                >
+
+                <button id="placeOrderBtn">
+                    Place Order
+                </button>
+
+                <p id="orderMessage"></p>
+            </section>
+        </div>
+
+        <div id="adminPage" class="page">
+            <section>
+                <h2>Admin Dashboard</h2>
+
+                <div class="admin-nav">
+                    <button type="button" onclick="showAdminTab('inventory')">
+                        Inventory Management
+                    </button>
+
+                    <button type="button" onclick="showAdminTab('notifications')">
+                        Low Stock Notifications
+                    </button>
+                </div>
+
+                <div id="inventoryTab">
+                    <h3>Inventory Management</h3>
+                    <div id="inventory">
+                        Inventory information will appear here.
+                    </div>
+                </div>
+
+                <div id="notificationsTab">
+                    <h3>Low Stock Notifications</h3>
+                    <div id="notifications">
+                        Notifications will appear here.
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+<!-- <script src="script.js"></script> -->
+<script src="script.js?v=2"></script>
+
+</body>
+</html>
