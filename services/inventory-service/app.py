@@ -468,7 +468,7 @@ def reserve_multiple_products():
                     # NEW 2: Check stock after deduction.
                     if (
                         product["stock_quantity"]
-                        < product["reorder_level"]
+                        <= product["reorder_level"]
                     ):
                         low_stock_products.append(product)
 
