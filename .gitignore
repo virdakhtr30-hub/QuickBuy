@@ -21,3 +21,6 @@ __pycache__/
 *.pem
 *.key
 .aws/
+
+# Temporary deployment artifacts
+build-artifact/

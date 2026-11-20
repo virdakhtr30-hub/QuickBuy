@@ -37,10 +37,16 @@ services:
     volumes:
       - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - inventory-service
+      - order-service
+      - notification-service
+    restart: unless-stopped
   
 
   
   inventory-service:
+    image: quickbuy-inventory:${IMAGE_TAG:-local}
     build: ./services/inventory-service
     container_name: quickbuy-inventory
     environment:
@@ -57,6 +63,7 @@ services:
 
   
   order-service:
+    image: quickbuy-order:${IMAGE_TAG:-local}
     build: ./services/order-service
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -72,6 +79,7 @@ services:
 
   
   notification-service:
+    image: quickbuy-notification:${IMAGE_TAG:-local}
     build: ./services/notification-service
     container_name: quickbuy-notification
     environment:
@@ -84,6 +92,7 @@ services:
       - postgres
 
   notification-consumer:
+    image: quickbuy-notification:${IMAGE_TAG:-local}
     build: ./services/notification-service
     container_name: quickbuy-notification-consumer
     environment:

@@ -52,3 +52,68 @@ jobs:
           args: >
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=300
+
+    
+  build-artifact:
+    name: Build and Package QuickBuy
+    needs: security-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v5
+
+      - name: Generate image tag
+        run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+      - name: Build Inventory Service image
+        run: |
+          docker build --platform linux/amd64 \
+            -t quickbuy-inventory:$IMAGE_TAG \
+            ./services/inventory-service
+
+      - name: Build Order Service image
+        run: |
+          docker build --platform linux/amd64 \
+            -t quickbuy-order:$IMAGE_TAG \
+            ./services/order-service
+
+      - name: Build Notification Service image
+        run: |
+          docker build --platform linux/amd64 \
+            -t quickbuy-notification:$IMAGE_TAG \
+            ./services/notification-service
+
+      - name: Export Docker images
+        run: |
+          mkdir -p build-artifact
+
+          docker save -o build-artifact/quickbuy-images.tar \
+            quickbuy-inventory:$IMAGE_TAG \
+            quickbuy-order:$IMAGE_TAG \
+            quickbuy-notification:$IMAGE_TAG
+
+      - name: Package deployment artifact
+        run: |
+          cp compose.yaml build-artifact/
+          cp -r frontend gateway database build-artifact/
+
+          cd build-artifact
+          zip -r "../quickbuy-build-$IMAGE_TAG.zip" .
+
+      - name: Verify generated artifact
+        run: |
+          ls -lh "quickbuy-build-$IMAGE_TAG.zip"
+          unzip -l "quickbuy-build-$IMAGE_TAG.zip"
+          unzip -t "quickbuy-build-$IMAGE_TAG.zip"
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: quickbuy-build-${{ env.IMAGE_TAG }}
+          path: quickbuy-build-${{ env.IMAGE_TAG }}.zip
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+
